@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Central de Segurança Condominial</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+
+<body class="bg-slate-100 text-slate-900">
+
+  <header class="bg-slate-950 text-white p-4 shadow">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 class="text-xl font-bold">Central de Segurança Condominial</h1>
+        <p class="text-sm text-slate-300">Portaria, zeladoria e resposta motorizada</p>
+      </div>
+      <div id="userBox" class="hidden text-sm">
+        <span id="userInfo"></span>
+        <button onclick="logout()" class="ml-3 bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-4">
+
+    <!-- LOGIN -->
+    <section id="loginView" class="max-w-md mx-auto bg-white p-6 rounded-xl shadow mt-8">
+      <h2 class="text-2xl font-bold mb-4">Entrar no sistema</h2>
+
+      <label class="block text-sm font-semibold mb-1">E-mail</label>
+      <input id="loginEmail" type="email" class="w-full border rounded-lg p-3 mb-3" placeholder="usuario@email.com">
+
+      <label class="block text-sm font-semibold mb-1">Senha</label>
+      <input id="loginPassword" type="password" class="w-full border rounded-lg p-3 mb-4" placeholder="Digite sua senha">
+
+      <button onclick="login()" class="w-full bg-slate-950 hover:bg-slate-800 text-white p-3 rounded-lg font-bold">
+        Entrar
+      </button>
+
+      <p class="text-xs text-slate-500 mt-4">
+        O cadastro inicial de usuários deve ser feito pelo Firebase Authentication.
+        Depois, o ADM completa os dados no painel.
+      </p>
+    </section>
+
+    <!-- APP -->
+    <section id="appView" class="hidden">
+
+      <!-- NAV -->
+      <div class="bg-white rounded-xl shadow p-3 mb-4 flex flex-wrap gap-2">
+        <button onclick="showPanel('dashboard')" class="navBtn bg-slate-900 text-white px-4 py-2 rounded-lg">Painel</button>
+        <button id="navAdmin" onclick="showPanel('admin')" class="navBtn hidden bg-slate-200 px-4 py-2 rounded-lg">ADM</button>
+        <button onclick="showPanel('alertas')" class="navBtn bg-slate-200 px-4 py-2 rounded-lg">Alertas</button>
+      </div>
+
+      <!-- DASHBOARD -->
+      <section id="dashboardPanel" class="panel">
+        <div class="grid md:grid-cols-3 gap-4 mb-4">
+          <div class="bg-white p-5 rounded-xl shadow">
+            <p class="text-sm text-slate-500">Alertas abertos</p>
+            <h3 id="countAberto" class="text-3xl font-bold">0</h3>
+          </div>
+          <div class="bg-white p-5 rounded-xl shadow">
+            <p class="text-sm text-slate-500">Em atendimento</p>
+            <h3 id="countAtendimento" class="text-3xl font-bold">0</h3>
+          </div>
+          <div class="bg-white p-5 rounded-xl shadow">
+            <p class="text-sm text-slate-500">Finalizados</p>
+            <h3 id="countFinalizado" class="text-3xl font-bold">0</h3>
+          </div>
+        </div>
+
+        <!-- PORTEIRO -->
+        <div id="porteiroBox" class="hidden bg-white p-5 rounded-xl shadow mb-4">
+          <h2 class="text-xl font-bold mb-3">Enviar alerta de segurança</h2>
+
+          <label class="block text-sm font-semibold mb-1">Prioridade</label>
+          <select id="alertaPrioridade" class="w-full border rounded-lg p-3 mb-3">
+            <option value="Normal">Normal</option>
+            <option value="Urgente">Urgente</option>
+            <option value="Crítico">Crítico</option>
+          </select>
+
+          <label class="block text-sm font-semibold mb-1">Observação</label>
+          <textarea id="alertaObservacao" class="w-full border rounded-lg p-3 mb-4" placeholder="Ex: movimentação suspeita, tentativa de invasão, briga, etc."></textarea>
+
+          <button onclick="criarAlerta()" class="w-full bg-red-700 hover:bg-red-800 text-white text-xl font-black p-5 rounded-xl">
+            🚨 SOLICITAR APOIO PRESENCIAL
+          </button>
+        </div>
+
+        <div id="vigilanteBox" class="hidden bg-white p-5 rounded-xl shadow mb-4">
+          <h2 class="text-xl font-bold mb-2">Painel do vigilante</h2>
+          <p class="text-slate-600">Veja os alertas abertos, aceite uma ocorrência e abra a rota no Google Maps.</p>
+        </div>
+
+        <div id="adminBox" class="hidden bg-white p-5 rounded-xl shadow mb-4">
+          <h2 class="text-xl font-bold mb-2">Painel administrativo</h2>
+          <p class="text-slate-600">Cadastre condomínios, portarias e perfis de usuários.</p>
+        </div>
+      </section>
+
+      <!-- ADMIN -->
+      <section id="adminPanel" class="panel hidden">
+
+        <div class="grid lg:grid-cols-3 gap-4">
+
+          <div class="bg-white p-5 rounded-xl shadow">
+            <h2 class="font-bold text-lg mb-3">Cadastrar condomínio</h2>
+            <input id="condNome" class="w-full border p-3 rounded-lg mb-2" placeholder="Nome do condomínio">
+            <input id="condEndereco" class="w-full border p-3 rounded-lg mb-2" placeholder="Endereço completo">
+            <input id="condCidade" class="w-full border p-3 rounded-lg mb-3" placeholder="Cidade">
+            <button onclick="addCondominio()" class="w-full bg-slate-950 text-white p-3 rounded-lg font-bold">Salvar condomínio</button>
+          </div>
+
+          <div class="bg-white p-5 rounded-xl shadow">
+            <h2 class="font-bold text-lg mb-3">Cadastrar portaria</h2>
+            <select id="portCondominio" class="w-full border p-3 rounded-lg mb-2"></select>
+            <input id="portNome" class="w-full border p-3 rounded-lg mb-2" placeholder="Ex: Portaria Principal">
+            <input id="portEndereco" class="w-full border p-3 rounded-lg mb-2" placeholder="Endereço da portaria">
+            <input id="portReferencia" class="w-full border p-3 rounded-lg mb-3" placeholder="Referência">
+            <button onclick="addPortaria()" class="w-full bg-slate-950 text-white p-3 rounded-lg font-bold">Salvar portaria</button>
+          </div>
+
+          <div class="bg-white p-5 rounded-xl shadow">
+            <h2 class="font-bold text-lg mb-3">Completar usuário</h2>
+            <p class="text-xs text-slate-500 mb-2">Use o UID gerado no Firebase Authentication.</p>
+            <input id="userUid" class="w-full border p-3 rounded-lg mb-2" placeholder="UID do usuário">
+            <input id="userNome" class="w-full border p-3 rounded-lg mb-2" placeholder="Nome">
+            <input id="userEmail" class="w-full border p-3 rounded-lg mb-2" placeholder="E-mail">
+            <select id="userRole" class="w-full border p-3 rounded-lg mb-2">
+              <option value="adm">ADM</option>
+              <option value="porteiro">Porteiro</option>
+              <option value="vigilante">Vigilante</option>
+            </select>
+            <select id="userCondominio" class="w-full border p-3 rounded-lg mb-2"></select>
+            <select id="userPortaria" class="w-full border p-3 rounded-lg mb-3"></select>
+            <button onclick="saveUserProfile()" class="w-full bg-slate-950 text-white p-3 rounded-lg font-bold">Salvar usuário</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ALERTAS -->
+      <section id="alertasPanel" class="panel hidden">
+        <div class="bg-white p-5 rounded-xl shadow mb-4">
+          <h2 class="text-xl font-bold">Alertas</h2>
+          <p class="text-sm text-slate-500">Lista em tempo real dos chamados de segurança.</p>
+        </div>
+
+        <div id="alertasList" class="grid gap-4"></div>
+      </section>
+
+    </section>
+  </main>
+
+  <div id="toast" class="hidden fixed bottom-4 right-4 bg-slate-950 text-white px-5 py-3 rounded-xl shadow-lg"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+    import {
+      getFirestore,
+      collection,
+      doc,
+      getDoc,
+      setDoc,
+      addDoc,
+      updateDoc,
+      serverTimestamp,
+      onSnapshot,
+      query,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    /*
+      1. Crie um projeto no Firebase.
+      2. Ative Authentication por e-mail/senha.
+      3. Ative Firestore Database.
+      4. Troque os dados abaixo pelo firebaseConfig do seu projeto.
+    */
+    const firebaseConfig = {
+    apiKey: "AIzaSyAIiqAfdfqEYU2nHR7BnQKddGm8Yz2F1ZM",
+    authDomain: "padrao-seguranca.firebaseapp.com",
+    projectId: "padrao-seguranca",
+    storageBucket: "padrao-seguranca.firebasestorage.app",
+    messagingSenderId: "255787773246",
+    appId: "1:255787773246:web:3c7d59fd708ce39db2106f"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let currentProfile = null;
+    let condominios = [];
+    let portarias = [];
+    let alertas = [];
+
+    const $ = (id) => document.getElementById(id);
+
+    window.login = async function () {
+      const email = $("loginEmail").value.trim();
+      const password = $("loginPassword").value.trim();
+
+      if (!email || !password) {
+        toast("Informe e-mail e senha.");
+        return;
+      }
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        console.error(error);
+        toast("Erro ao entrar. Confira e-mail e senha.");
+      }
+    };
+
+    window.logout = async function () {
+      await signOut(auth);
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        currentUser = null;
+        currentProfile = null;
+        $("loginView").classList.remove("hidden");
+        $("appView").classList.add("hidden");
+        $("userBox").classList.add("hidden");
+        return;
+      }
+
+      currentUser = user;
+      const profileSnap = await getDoc(doc(db, "users", user.uid));
+
+      if (!profileSnap.exists()) {
+        toast("Usuário autenticado, mas sem perfil no Firestore.");
+        await signOut(auth);
+        return;
+      }
+
+      currentProfile = { id: user.uid, ...profileSnap.data() };
+
+      $("loginView").classList.add("hidden");
+      $("appView").classList.remove("hidden");
+      $("userBox").classList.remove("hidden");
+      $("userInfo").innerText = `${currentProfile.nome} | ${currentProfile.role}`;
+
+      applyRoleUI();
+      startRealtime();
+    });
+
+    function applyRoleUI() {
+      $("navAdmin").classList.toggle("hidden", currentProfile.role !== "adm");
+      $("porteiroBox").classList.toggle("hidden", currentProfile.role !== "porteiro");
+      $("vigilanteBox").classList.toggle("hidden", currentProfile.role !== "vigilante");
+      $("adminBox").classList.toggle("hidden", currentProfile.role !== "adm");
+      showPanel("dashboard");
+    }
+
+    window.showPanel = function (panel) {
+      document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
+      $(`${panel}Panel`).classList.remove("hidden");
+    };
+
+    function startRealtime() {
+      onSnapshot(collection(db, "condominios"), (snap) => {
+        condominios = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderSelects();
+      });
+
+      onSnapshot(collection(db, "portarias"), (snap) => {
+        portarias = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderSelects();
+      });
+
+      const alertasQuery = query(collection(db, "alertas"), orderBy("criadoEm", "desc"));
+      onSnapshot(alertasQuery, (snap) => {
+        alertas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAlertas();
+        renderCounts();
+      });
+    }
+
+    function renderSelects() {
+      const condOptions = condominios.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join("");
+      $("portCondominio").innerHTML = condOptions;
+      $("userCondominio").innerHTML = `<option value="">Nenhum</option>` + condOptions;
+
+      const portOptions = portarias.map(p => `<option value="${p.id}">${escapeHtml(p.nome)}</option>`).join("");
+      $("userPortaria").innerHTML = `<option value="">Nenhuma</option>` + portOptions;
+    }
+
+    window.addCondominio = async function () {
+      const nome = $("condNome").value.trim();
+      const endereco = $("condEndereco").value.trim();
+      const cidade = $("condCidade").value.trim();
+
+      if (!nome || !endereco) {
+        toast("Informe nome e endereço.");
+        return;
+      }
+
+      await addDoc(collection(db, "condominios"), {
+        nome,
+        endereco,
+        cidade,
+        ativo: true,
+        criadoEm: serverTimestamp()
+      });
+
+      $("condNome").value = "";
+      $("condEndereco").value = "";
+      $("condCidade").value = "";
+      toast("Condomínio salvo.");
+    };
+
+    window.addPortaria = async function () {
+      const condominioId = $("portCondominio").value;
+      const nome = $("portNome").value.trim();
+      const endereco = $("portEndereco").value.trim();
+      const referencia = $("portReferencia").value.trim();
+
+      if (!condominioId || !nome || !endereco) {
+        toast("Informe condomínio, nome e endereço.");
+        return;
+      }
+
+      await addDoc(collection(db, "portarias"), {
+        condominioId,
+        nome,
+        endereco,
+        referencia,
+        ativo: true,
+        criadoEm: serverTimestamp()
+      });
+
+      $("portNome").value = "";
+      $("portEndereco").value = "";
+      $("portReferencia").value = "";
+      toast("Portaria salva.");
+    };
+
+    window.saveUserProfile = async function () {
+      const uid = $("userUid").value.trim();
+      const nome = $("userNome").value.trim();
+      const email = $("userEmail").value.trim();
+      const role = $("userRole").value;
+      const condominioId = $("userCondominio").value || null;
+      const portariaId = $("userPortaria").value || null;
+
+      if (!uid || !nome || !email || !role) {
+        toast("Informe UID, nome, e-mail e perfil.");
+        return;
+      }
+
+      await setDoc(doc(db, "users", uid), {
+        nome,
+        email,
+        role,
+        condominioId,
+        portariaId,
+        ativo: true,
+        atualizadoEm: serverTimestamp()
+      });
+
+      $("userUid").value = "";
+      $("userNome").value = "";
+      $("userEmail").value = "";
+      toast("Usuário salvo.");
+    };
+
+    window.criarAlerta = async function () {
+      if (currentProfile.role !== "porteiro") {
+        toast("Apenas porteiros podem criar alertas.");
+        return;
+      }
+
+      const portaria = portarias.find(p => p.id === currentProfile.portariaId);
+      const condominio = condominios.find(c => c.id === currentProfile.condominioId);
+
+      if (!portaria || !condominio) {
+        toast("Seu usuário precisa estar vinculado a condomínio e portaria.");
+        return;
+      }
+
+      const prioridade = $("alertaPrioridade").value;
+      const observacao = $("alertaObservacao").value.trim();
+
+      await addDoc(collection(db, "alertas"), {
+        condominioId: condominio.id,
+        condominioNome: condominio.nome,
+        portariaId: portaria.id,
+        portariaNome: portaria.nome,
+        endereco: portaria.endereco || condominio.endereco,
+        porteiroId: currentUser.uid,
+        porteiroNome: currentProfile.nome,
+        prioridade,
+        observacao,
+        status: "Aberto",
+        vigilanteId: null,
+        vigilanteNome: null,
+        criadoEm: serverTimestamp(),
+        aceitoEm: null,
+        finalizadoEm: null,
+        canceladoEm: null
+      });
+
+      $("alertaObservacao").value = "";
+      toast("Alerta enviado para a base.");
+    };
+
+    function renderCounts() {
+      $("countAberto").innerText = alertas.filter(a => a.status === "Aberto").length;
+      $("countAtendimento").innerText = alertas.filter(a => a.status === "Em atendimento").length;
+      $("countFinalizado").innerText = alertas.filter(a => a.status === "Finalizado").length;
+    }
+
+    function renderAlertas() {
+      let lista = alertas;
+
+      if (currentProfile.role === "porteiro") {
+        lista = lista.filter(a => a.porteiroId === currentUser.uid);
+      }
+
+      $("alertasList").innerHTML = lista.map(alertaCard).join("") || `
+        <div class="bg-white p-5 rounded-xl shadow text-slate-500">
+          Nenhum alerta encontrado.
+        </div>
+      `;
+    }
+
+    function alertaCard(a) {
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.endereco || "")}`;
+
+      const canAccept = currentProfile.role === "vigilante" && a.status === "Aberto";
+      const canFinish = currentProfile.role === "vigilante" && a.status === "Em atendimento" && a.vigilanteId === currentUser.uid;
+      const canCancel = currentProfile.role === "porteiro" && a.status === "Aberto" && a.porteiroId === currentUser.uid;
+
+      return `
+        <article class="bg-white p-5 rounded-xl shadow border-l-8 ${statusBorder(a.status)}">
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+            <div>
+              <h3 class="text-xl font-black">${escapeHtml(a.prioridade || "Normal")} | ${escapeHtml(a.status)}</h3>
+              <p><strong>Condomínio:</strong> ${escapeHtml(a.condominioNome || "")}</p>
+              <p><strong>Portaria:</strong> ${escapeHtml(a.portariaNome || "")}</p>
+              <p><strong>Endereço:</strong> ${escapeHtml(a.endereco || "")}</p>
+              <p><strong>Porteiro:</strong> ${escapeHtml(a.porteiroNome || "")}</p>
+              <p><strong>Vigilante:</strong> ${escapeHtml(a.vigilanteNome || "Ainda não aceito")}</p>
+              <p class="mt-2 text-slate-700"><strong>Observação:</strong> ${escapeHtml(a.observacao || "Sem observação")}</p>
+            </div>
+
+            <div class="flex flex-col gap-2 min-w-52">
+              <a href="${mapsUrl}" target="_blank" class="text-center bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg font-bold">
+                Abrir rota no Maps
+              </a>
+
+              ${canAccept ? `<button onclick="aceitarAlerta('${a.id}')" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg font-bold">Aceitar alerta</button>` : ""}
+
+              ${canFinish ? `<button onclick="finalizarAlerta('${a.id}')" class="bg-slate-950 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-bold">Finalizar operação</button>` : ""}
+
+              ${canCancel ? `<button onclick="cancelarAlerta('${a.id}')" class="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded-lg font-bold">Cancelar alerta</button>` : ""}
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    window.aceitarAlerta = async function (id) {
+      if (!confirm("Aceitar este alerta e iniciar deslocamento?")) return;
+
+      await updateDoc(doc(db, "alertas", id), {
+        status: "Em atendimento",
+        vigilanteId: currentUser.uid,
+        vigilanteNome: currentProfile.nome,
+        aceitoEm: serverTimestamp()
+      });
+
+      toast("Alerta aceito.");
+    };
+
+    window.finalizarAlerta = async function (id) {
+      const resumo = prompt("Resumo da operação:", "Atendimento finalizado no local.");
+
+      await updateDoc(doc(db, "alertas", id), {
+        status: "Finalizado",
+        resumoFinal: resumo || "",
+        finalizadoEm: serverTimestamp()
+      });
+
+      toast("Operação finalizada.");
+    };
+
+    window.cancelarAlerta = async function (id) {
+      if (!confirm("Cancelar este alerta?")) return;
+
+      await updateDoc(doc(db, "alertas", id), {
+        status: "Cancelado",
+        canceladoEm: serverTimestamp()
+      });
+
+      toast("Alerta cancelado.");
+    };
+
+    function statusBorder(status) {
+      if (status === "Aberto") return "border-red-700";
+      if (status === "Em atendimento") return "border-yellow-500";
+      if (status === "Finalizado") return "border-green-700";
+      if (status === "Cancelado") return "border-slate-400";
+      return "border-slate-300";
+    }
+
+    function toast(msg) {
+      $("toast").innerText = msg;
+      $("toast").classList.remove("hidden");
+      setTimeout(() => $("toast").classList.add("hidden"), 3000);
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+</html>
