@@ -8,6 +8,7 @@ import {
 } from "./firebase.js";
 
 import { state } from "./state.js";
+import { getCondominioName, getPortariaName, getPortariaAddress, getUserName, info } from "./admin.js";
 import {
   $,
   h,
@@ -84,7 +85,17 @@ export function renderAlertas() {
 }
 
 function alertaCard(alerta) {
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(alerta.endereco || "")}`;
+  const condominioNome = info(alerta.condominioNome, getCondominioName(alerta.condominioId));
+  const portariaNome = info(alerta.portariaNome, getPortariaName(alerta.portariaId));
+  const endereco = info(alerta.endereco, getPortariaAddress(alerta.portariaId) || alerta.endereco || "");
+  const porteiroNome = info(alerta.porteiroNome, getUserName(alerta.porteiroId));
+  const vigilanteNome = info(alerta.vigilanteNome, getUserName(alerta.vigilanteId));
+  const prioridade = info(alerta.prioridade, "Normal");
+  const status = info(alerta.status, "Status não informado");
+  const observacao = info(alerta.observacao, "Sem observação inicial");
+  const resumoFinal = info(alerta.resumoFinal, "");
+
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(endereco || "")}`;
 
   const canAccept = state.currentProfile.role === "vigilante" && alerta.status === "Aberto";
   const canFinish =
@@ -98,24 +109,25 @@ function alertaCard(alerta) {
     alerta.porteiroId === state.currentUser.uid;
 
   return `
-    <article class="soft-card rounded-3xl p-5 border-l-8 ${statusBorder(alerta.status)}">
+    <article class="soft-card rounded-3xl p-5 border-l-8 ${statusBorder(status)}">
       <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4">
-        <div>
+        <div class="space-y-1">
           <div class="flex flex-wrap items-center gap-2 mb-3">
-            <span class="px-3 py-1 rounded-full text-sm font-black ${priorityClass(alerta.prioridade)}">
-              ${h(alerta.prioridade || "Normal")}
+            <span class="px-3 py-1 rounded-full text-sm font-black ${priorityClass(prioridade)}">
+              ${h(prioridade)}
             </span>
-            <span class="px-3 py-1 rounded-full text-sm font-black ${statusClass(alerta.status)}">
-              ${h(alerta.status)}
+            <span class="px-3 py-1 rounded-full text-sm font-black ${statusClass(status)}">
+              ${h(status)}
             </span>
           </div>
 
-          <p class="text-lg font-black">${h(alerta.condominioNome)}</p>
-          <p><strong>Portaria:</strong> ${h(alerta.portariaNome)}</p>
-          <p><strong>Endereço:</strong> ${h(alerta.endereco)}</p>
-          <p><strong>Porteiro:</strong> ${h(alerta.porteiroNome)}</p>
-          <p><strong>Vigilante:</strong> ${h(alerta.vigilanteNome || "Ainda não aceito")}</p>
-          <p class="mt-2 text-slate-700"><strong>Observação:</strong> ${h(alerta.observacao || "Sem observação")}</p>
+          <p class="text-lg font-black">${h(condominioNome)}</p>
+          <p><strong>Portaria:</strong> ${h(portariaNome)}</p>
+          <p><strong>Endereço:</strong> ${h(endereco || "Endereço não informado")}</p>
+          <p><strong>Porteiro:</strong> ${h(porteiroNome)}</p>
+          <p><strong>Vigilante:</strong> ${h(vigilanteNome)}</p>
+          <p class="mt-2 text-slate-700"><strong>Observação:</strong> ${h(observacao)}</p>
+          ${resumoFinal ? `<p class="mt-2 text-slate-700"><strong>Resumo final:</strong> ${h(resumoFinal)}</p>` : ""}
         </div>
 
         <div class="grid gap-2 min-w-56">

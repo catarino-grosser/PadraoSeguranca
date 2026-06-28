@@ -17,7 +17,7 @@ export function renderSelects() {
   const activePorts = state.portarias.filter((p) => p.ativo !== false);
 
   const condOptions = activeConds
-    .map((c) => `<option value="${c.id}">${h(c.nome)}</option>`)
+    .map((c) => `<option value="${c.id}">${h(info(c.nome, "Condomínio sem nome"))}</option>`)
     .join("");
 
   $("portCondominio").innerHTML = condOptions || '<option value="">Cadastre um condomínio</option>';
@@ -26,7 +26,7 @@ export function renderSelects() {
   $("userPortaria").innerHTML =
     '<option value="">Nenhuma</option>' +
     activePorts
-      .map((p) => `<option value="${p.id}">${h(p.nome)} - ${h(getCondominioName(p.condominioId))}</option>`)
+      .map((p) => `<option value="${p.id}">${h(info(p.nome, "Portaria sem nome"))} - ${h(getCondominioName(p.condominioId))}</option>`)
       .join("");
 }
 
@@ -250,9 +250,9 @@ export function renderCondominiosList() {
         <div class="record-card ${c.ativo === false ? "inactive" : ""}">
           <div class="flex items-start justify-between gap-2">
             <div>
-              <p class="font-black">${h(c.nome)}</p>
-              <p class="text-sm text-slate-600">${h(c.endereco)}</p>
-              <p class="text-sm text-slate-600">${h(c.cidade)}</p>
+              <p class="font-black">${h(info(c.nome, "Condomínio sem nome"))}</p>
+              <p class="text-sm text-slate-600">${h(info(c.endereco, "Endereço não informado"))}</p>
+              <p class="text-sm text-slate-600">${h(info(c.cidade, "Cidade não informada"))}</p>
             </div>
             <span class="badge ${c.ativo === false ? "badge-inactive" : "badge-active"}">
               ${c.ativo === false ? "Desativado" : "Ativo"}
@@ -286,10 +286,10 @@ export function renderPortariasList() {
         <div class="record-card ${p.ativo === false ? "inactive" : ""}">
           <div class="flex items-start justify-between gap-2">
             <div>
-              <p class="font-black">${h(p.nome)}</p>
+              <p class="font-black">${h(info(p.nome, "Portaria sem nome"))}</p>
               <p class="text-sm text-slate-600">${h(getCondominioName(p.condominioId))}</p>
-              <p class="text-sm text-slate-600">${h(p.endereco)}</p>
-              <p class="text-sm text-slate-600">${h(p.referencia)}</p>
+              <p class="text-sm text-slate-600">${h(info(p.endereco, "Endereço não informado"))}</p>
+              <p class="text-sm text-slate-600">${h(info(p.referencia, "Referência não informada"))}</p>
             </div>
             <span class="badge ${p.ativo === false ? "badge-inactive" : "badge-active"}">
               ${p.ativo === false ? "Desativada" : "Ativa"}
@@ -330,9 +330,9 @@ export function renderUsersList() {
         <div class="record-card ${u.ativo === false ? "inactive" : ""}">
           <div class="flex items-start justify-between gap-2">
             <div>
-              <p class="font-black">${h(u.nome)}</p>
-              <p class="text-sm text-slate-600">${h(u.email)}</p>
-              <p class="text-sm"><strong>Perfil:</strong> ${h(u.role)}</p>
+              <p class="font-black">${h(info(u.nome, "Funcionário sem nome"))}</p>
+              <p class="text-sm text-slate-600">${h(info(u.email, "E-mail não informado"))}</p>
+              <p class="text-sm"><strong>Perfil:</strong> ${h(info(u.role, "Perfil não informado"))}</p>
               <p class="text-sm"><strong>Condomínio:</strong> ${h(getCondominioName(u.condominioId))}</p>
               <p class="text-sm"><strong>Portaria:</strong> ${h(getPortariaName(u.portariaId))}</p>
             </div>
@@ -352,14 +352,43 @@ export function renderUsersList() {
       .join("") || '<p class="text-slate-500">Nenhum funcionário encontrado.</p>';
 }
 
+export function info(value, fallback = "Não informado") {
+  const text = String(value ?? "").trim();
+  return text || fallback;
+}
+
 export function getCondominioName(id) {
   if (!id) return "Não vinculado";
   const c = state.condominios.find((item) => item.id === id);
-  return c ? c.nome : "Não encontrado";
+  return c ? info(c.nome, "Condomínio sem nome") : "Não encontrado";
+}
+
+export function getCondominioAddress(id) {
+  if (!id) return "Endereço não vinculado";
+  const c = state.condominios.find((item) => item.id === id);
+  return c ? info(c.endereco, "Endereço não informado") : "Endereço não encontrado";
 }
 
 export function getPortariaName(id) {
   if (!id) return "Não vinculada";
   const p = state.portarias.find((item) => item.id === id);
-  return p ? p.nome : "Não encontrada";
+  return p ? info(p.nome, "Portaria sem nome") : "Não encontrada";
+}
+
+export function getPortariaAddress(id) {
+  if (!id) return "Endereço não vinculado";
+  const p = state.portarias.find((item) => item.id === id);
+  return p ? info(p.endereco, "Endereço não informado") : "Endereço não encontrado";
+}
+
+export function getUserName(id) {
+  if (!id) return "Não atribuído";
+  const u = state.users.find((item) => item.id === id);
+  return u ? info(u.nome, "Funcionário sem nome") : "Não encontrado";
+}
+
+export function getUserEmail(id) {
+  if (!id) return "E-mail não vinculado";
+  const u = state.users.find((item) => item.id === id);
+  return u ? info(u.email, "E-mail não informado") : "E-mail não encontrado";
 }
