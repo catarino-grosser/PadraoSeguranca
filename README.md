@@ -1,20 +1,46 @@
-# Padrão Segurança - Central Operacional v1.2.1
+# Padrão Segurança - Central Operacional v1.1
 
-## Correções da v1.2.1
+Projeto web para Netlify + GitHub + Firebase Authentication + Firestore.
 
-- Corrige cards de alertas que apareciam quase vazios.
-- Alertas agora tentam mostrar dados por nome direto e, se faltar, buscam por ID:
-  - condomínio
-  - portaria
-  - endereço
-  - porteiro
-  - vigilante
-- Listas de condomínios, portarias e funcionários agora mostram textos de fallback:
-  - Não informado
-  - Não vinculado
-  - Endereço não informado
-- Mantém FirebaseConfig já configurado em `js/firebase.js`.
+## Estrutura
+
+```txt
+padrao-seguranca-v1-1/
+├── index.html
+├── css/
+│   └── style.css
+├── js/
+│   ├── admin.js
+│   ├── alertas.js
+│   ├── app.js
+│   ├── auth.js
+│   ├── firebase.js
+│   ├── state.js
+│   └── utils.js
+└── img/
+```
 
 ## Deploy
 
-Substitua a versão anterior no GitHub e publique no Netlify.
+1. Envie todos os arquivos para o GitHub.
+2. Conecte o repositório ao Netlify.
+3. O arquivo principal é `index.html`.
+
+## Firebase
+
+O arquivo `js/firebase.js` já contém o FirebaseConfig informado.
+
+## Perfis
+
+- `adm`
+- `porteiro`
+- `vigilante`
+
+## Firestore
+
+Coleções usadas:
+
+- `users`
+- `condominios`
+- `portarias`
+- `alertas`
