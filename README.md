@@ -1,24 +1,20 @@
-# Padrão Segurança - Central Operacional v1.2
+# Padrão Segurança - Central Operacional v1.2.1
 
-## Melhorias da v1.2
+## Correções da v1.2.1
 
-- Corrige a cor dos textos digitados nos inputs.
-- Corrige a cor dos placeholders.
-- Melhora contraste em `input`, `select`, `textarea` e campos de busca.
-- Mantém o FirebaseConfig já configurado em `js/firebase.js`.
-- Mantém a estrutura separada por arquivos.
+- Corrige cards de alertas que apareciam quase vazios.
+- Alertas agora tentam mostrar dados por nome direto e, se faltar, buscam por ID:
+  - condomínio
+  - portaria
+  - endereço
+  - porteiro
+  - vigilante
+- Listas de condomínios, portarias e funcionários agora mostram textos de fallback:
+  - Não informado
+  - Não vinculado
+  - Endereço não informado
+- Mantém FirebaseConfig já configurado em `js/firebase.js`.
 
-## Estrutura
+## Deploy
 
-```txt
-padrao-seguranca-v1-2/
-├── index.html
-├── css/style.css
-├── js/firebase.js
-├── js/app.js
-├── js/auth.js
-├── js/admin.js
-├── js/alertas.js
-├── js/state.js
-└── js/utils.js
-```
+Substitua a versão anterior no GitHub e publique no Netlify.
