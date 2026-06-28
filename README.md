@@ -1,46 +1,24 @@
-# Padrão Segurança - Central Operacional v1.1
+# Padrão Segurança - Central Operacional v1.2
 
-Projeto web para Netlify + GitHub + Firebase Authentication + Firestore.
+## Melhorias da v1.2
+
+- Corrige a cor dos textos digitados nos inputs.
+- Corrige a cor dos placeholders.
+- Melhora contraste em `input`, `select`, `textarea` e campos de busca.
+- Mantém o FirebaseConfig já configurado em `js/firebase.js`.
+- Mantém a estrutura separada por arquivos.
 
 ## Estrutura
 
 ```txt
-padrao-seguranca-v1-1/
+padrao-seguranca-v1-2/
 ├── index.html
-├── css/
-│   └── style.css
-├── js/
-│   ├── admin.js
-│   ├── alertas.js
-│   ├── app.js
-│   ├── auth.js
-│   ├── firebase.js
-│   ├── state.js
-│   └── utils.js
-└── img/
+├── css/style.css
+├── js/firebase.js
+├── js/app.js
+├── js/auth.js
+├── js/admin.js
+├── js/alertas.js
+├── js/state.js
+└── js/utils.js
 ```
-
-## Deploy
-
-1. Envie todos os arquivos para o GitHub.
-2. Conecte o repositório ao Netlify.
-3. O arquivo principal é `index.html`.
-
-## Firebase
-
-O arquivo `js/firebase.js` já contém o FirebaseConfig informado.
-
-## Perfis
-
-- `adm`
-- `porteiro`
-- `vigilante`
-
-## Firestore
-
-Coleções usadas:
-
-- `users`
-- `condominios`
-- `portarias`
-- `alertas`
