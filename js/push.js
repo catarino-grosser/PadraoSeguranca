@@ -6,7 +6,7 @@ import { toast } from "./utils.js";
 // Firebase Console → Configurações do projeto → Cloud Messaging →
 // Certificados push da Web → "Gerar par de chaves".
 // Essa chave é pública, pode ficar no código do cliente sem problema.
-const VAPID_KEY = "COLE_AQUI_SUA_VAPID_KEY_DO_FIREBASE";
+const VAPID_KEY = "BGhBoKoJWgKenixwUyfgrT9VgANDHrgjt6WGNT-P5gvY7lZdBHi5dsPcaF71LFpJoevH0z_5YDn9iH3aFqZ5jnc";
 
 export async function ativarNotificacoes(btn) {
   if (!state.currentUser) return;
