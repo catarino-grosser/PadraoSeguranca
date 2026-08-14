@@ -1,8 +1,12 @@
-import admin from "firebase-admin";
+import { initializeApp, cert, getApps } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { getMessaging } from "firebase-admin/messaging";
 
 // Evita "already initialized" quando a Lambda reaproveita o mesmo container
 // entre chamadas (comportamento normal do Netlify Functions).
-if (!admin.apps.length) {
+let app;
+if (!getApps().length) {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 
   if (!raw) {
@@ -20,15 +24,15 @@ if (!admin.apps.length) {
     );
   }
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
+  app = initializeApp({ credential: cert(serviceAccount) });
+} else {
+  app = getApps()[0];
 }
 
-export const auth = admin.auth();
-export const db = admin.firestore();
-export const messaging = admin.messaging();
-export const FieldValue = admin.firestore.FieldValue;
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const messaging = getMessaging(app);
+export { FieldValue };
 
 function extractToken(req) {
   const header = req.headers.get("authorization") || "";
