@@ -1,0 +1,8 @@
+{
+  "name": "padrao-seguranca-functions",
+  "private": true,
+  "description": "Dependências usadas pelas Netlify Functions em netlify/functions/",
+  "dependencies": {
+    "firebase-admin": "^14.0.0"
+  }
+}
